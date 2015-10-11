@@ -1,12 +1,15 @@
 class Instructor::SectionsController < ApplicationController
-	before_action :authenticate_user!
-	before_action :require_authorized_for_current_course, :only => [:create]
-	before_action :require_authorized_for_current_section, :only => [:update]
+  before_action :authenticate_user!
+  before_action :require_authorized_for_current_course, :only => [:create]
+  before_action :require_authorized_for_current_section, :only => [:update]
 
-  
-  def create	
-   	 	@section = current_course.sections.create(section_params)
-    	redirect_to instructor_course_path(current_course)
+  def new
+    @section = Section.new
+  end
+
+  def create
+    @section = current_course.sections.create(section_params)
+    redirect_to instructor_course_path(current_course)
   end
 
   def update
@@ -20,7 +23,7 @@ class Instructor::SectionsController < ApplicationController
 
   def require_authorization_for_current_section
     if current_section.course.user != current_user
-     render :text => 'Unauthorized', :status => :Unauthorized
+      render :text => 'Unauthorized', :status => :Unauthorized
     end
   end
 
@@ -30,15 +33,28 @@ class Instructor::SectionsController < ApplicationController
 
 
   def require_authorized_for_current_course
-  	if current_course.user != current_user
-  			render :text => "Unauthorized", :status => :Unauthorized
-  	end
+    if current_course.user != current_user
+      render :text => "Unauthorized", :status => :unauthorized
+    end
   end
-  	
- 	helper_method :current_course
+
+  helper_method :current_course
   def current_course
-    current_section.course
+    if params[:course_id].present?
+      @current_course ||= Course.find(params[:course_id])
+    else
+      current_section.course
+    end
   end
+
+
+  def require_authorized_for_current_section
+    if current_section.course.user.id != current_user.id
+      render :text => 'Unauthorized', :status => :unauthorized
+    end
+  end
+
+
 
   def section_params
     params.require(:section).permit(:title, :row_order_position)
