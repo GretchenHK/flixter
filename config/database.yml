@@ -17,7 +17,7 @@
 development:
   adapter: postgresql
   encoding: unicode
-  database: flixter_development
+  database: flixter_development_gretchen
   pool: 5
   username: postgres
   password: password
